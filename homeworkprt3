@@ -1,0 +1,15 @@
+
+public class checkMethod
+{
+	private int check;
+	
+	
+  public void setCheck(int c)
+  {
+	   check = c;
+  }
+  public int getCheck()
+  {
+	   return check;
+  }
+}
