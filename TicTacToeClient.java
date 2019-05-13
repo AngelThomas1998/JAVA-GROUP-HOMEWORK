@@ -175,6 +175,7 @@ public class TicTacToeClient extends JFrame implements Runnable
          displayMessage( message + "\n" ); // display the message
    } // end method processMessage
 
+		// CHANGED
 	  public void init()
 
     {
@@ -359,6 +360,7 @@ public class TicTacToeClient extends JFrame implements Runnable
 			((JFrame) frame).dispose();
 		}
 	}); // modified */
+	// CHANGED
 
    // manipulate displayArea in event-dispatch thread
    private void displayMessage( final String messageToDisplay )
