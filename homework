@@ -1,317 +1,361 @@
-// Fig. 27.15: TicTacToeClient.java
-// Client side of client/server Tic-Tac-Toe program.
+// Fig. 27.13: TicTacToeServer.java
+// Server side of client/server Tic-Tac-Toe program.
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.InetAddress;
 import java.io.IOException;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import java.util.Formatter;
 import java.util.Scanner;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.Condition;
+import javax.swing.JFrame;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
-public class TicTacToeClient extends JFrame implements Runnable 
+public class TicTacToeServer extends JFrame 
 {
-   private JTextField idField; // textfield to display player's mark
-   private JTextArea displayArea; // JTextArea to display output
-   private JPanel boardPanel; // panel for tic-tac-toe board
-   private JPanel panel2; // panel to hold board
-   private Square[][] board; // tic-tac-toe board
-   private Square currentSquare; // current square
-   private Socket connection; // connection to server
-   private Scanner input; // input from server
-   private Formatter output; // output to server
-   private String ticTacToeHost; // host name for server
-   private String myMark; // this client's mark
-   private boolean myTurn; // determines which client's turn it is
-   private final String X_MARK = "X"; // mark for first client
-   private final String O_MARK = "O"; // mark for second client
+   private String[] board = new String[ 9 ]; // tic-tac-toe board
+   private JTextArea outputArea; // for outputting moves
+   private Player[] players; // array of Players
+   private ServerSocket server; // server socket to connect with clients
+   private int currentPlayer; // keeps track of player with current move
+   private final static int PLAYER_X = 0; // constant for first player
+   private final static int PLAYER_O = 1; // constant for second player
+   private final static String[] MARKS = { "X", "O" }; // array of marks
+   private ExecutorService runGame; // will run players
+   private Lock gameLock; // to lock game for synchronization
+   private Condition otherPlayerConnected; // to wait for other player
+   private Condition otherPlayerTurn; // to wait for other player's turn
    
-   private JButton restart;
+  // private checkMethod cm = new checkMethod();
+   
+   
+   private int check;
 
-   // set up user-interface and board
-   public TicTacToeClient( String host )
-   { 
-	   checkMethod cm = new checkMethod();
-	   
-      ticTacToeHost = host; // set name of server
-      displayArea = new JTextArea( 4, 30 ); // set up JTextArea
-      displayArea.setEditable( false );
-      add( new JScrollPane( displayArea ), BorderLayout.SOUTH );
-
-      boardPanel = new JPanel(); // set up panel for squares in board
-      boardPanel.setLayout( new GridLayout( 3, 3, 0, 0 ) );
-
-      board = new Square[ 3 ][ 3 ]; // create board
-
-      // loop over the rows in the board
-      for ( int row = 0; row < board.length; row++ ) 
-      {
-         // loop over the columns in the board
-         for ( int column = 0; column < board[ row ].length; column++ ) 
-         {
-            // create square
-            board[ row ][ column ] = new Square( " ", row * 3 + column );
-            boardPanel.add( board[ row ][ column ] ); // add square       
-         } // end inner for
-      } // end outer for
-
-      idField = new JTextField(); // set up textfield
-      idField.setEditable( false );
-      add( idField, BorderLayout.NORTH );
-      
-      panel2 = new JPanel(); // set up panel to contain boardPanel
-      panel2.add( boardPanel, BorderLayout.CENTER ); // add board panel
-      add( panel2, BorderLayout.CENTER ); // add container panel
-      
-      
-      restart = new JButton("Restart");
-      add(restart, BorderLayout.WEST);
-      
-      
-      restart.addActionListener(
-    		  new ActionListener()
-    		  {
-    			  public void actionPerformed(ActionEvent event)
-    			  { 
-    				cm.setCheck(1); // check method
-    			    Restart(); // public void at bottom
-    			  }
-    		  }
-    		  
-    		  );
-      
-      
-      
-
-      setSize( 300, 225 ); // set size of window
-      setVisible( true ); // show window
-
-      startClient();
-   } // end TicTacToeClient constructor
-
-   // start the client thread
-   public void startClient()
+   // set up tic-tac-toe server and GUI that displays messages
+   public TicTacToeServer()
    {
-      try // connect to server and get streams
-      {
-         // make connection to server
-         connection = new Socket( 
-            InetAddress.getByName( ticTacToeHost ), 12345 );
+      super( "Tic-Tac-Toe Server" ); // set title of window
 
-         // get streams for input and output
-         input = new Scanner( connection.getInputStream() );
-         output = new Formatter( connection.getOutputStream() );
-      } // end try
-      catch ( IOException ioException )
+      // create ExecutorService with a thread for each player
+      runGame = Executors.newFixedThreadPool( 2 );
+      gameLock = new ReentrantLock(); // create lock for game
+
+      // condition variable for both players being connected
+      otherPlayerConnected = gameLock.newCondition();
+
+      // condition variable for the other player's turn
+      otherPlayerTurn = gameLock.newCondition();      
+
+      for ( int i = 0; i < 9; i++ )
+         board[ i ] = new String( "" ); // create tic-tac-toe board
+      players = new Player[ 2 ]; // create array of players
+      currentPlayer = PLAYER_X; // set current player to first player
+
+      
+ 
+      try
       {
-         ioException.printStackTrace();         
+         server = new ServerSocket( 12345, 2 ); // set up ServerSocket
+      } // end try
+      catch ( IOException ioException ) 
+      {
+         ioException.printStackTrace();
+         System.exit( 1 );
       } // end catch
 
-      // create and start worker thread for this client
-      ExecutorService worker = Executors.newFixedThreadPool( 1 );
-      worker.execute( this ); // execute client
-   } // end method startClient
+      outputArea = new JTextArea(); // create JTextArea for output
+      add( outputArea, BorderLayout.CENTER );
+      outputArea.setText( "Server awaiting connections\n" );
 
-   // control thread that allows continuous update of displayArea
-   public void run()
+      setSize( 300, 300 ); // set size of window
+      setVisible( true ); // show window
+   } // end TicTacToeServer constructor
+
+   // wait for two connections so game can be played
+   public void execute()
    {
-      myMark = input.nextLine(); // get player's mark (X or O)
-
-      SwingUtilities.invokeLater( 
-         new Runnable() 
-         {         
-            public void run()
-            {
-               // display player's mark
-               idField.setText( "You are player \"" + myMark + "\"" );
-            } // end method run
-         } // end anonymous inner class
-      ); // end call to SwingUtilities.invokeLater
-         
-      myTurn = ( myMark.equals( X_MARK ) ); // determine if client's turn
-
-      // receive messages sent to client and output them
-      while ( true )
+      // wait for each client to connect
+      for ( int i = 0; i < players.length; i++ ) 
       {
-         if ( input.hasNextLine() )
-            processMessage( input.nextLine() );
-      } // end while
-   } // end method run
+         try // wait for connection, create Player, start runnable
+         {
+            players[ i ] = new Player( server.accept(), i );
+            runGame.execute( players[ i ] ); // execute player runnable
+         } // end try
+         catch ( IOException ioException ) 
+         {
+            ioException.printStackTrace();
+            System.exit( 1 );
+         } // end catch
+      } // end for
 
-   // process messages received by client
-   private void processMessage( String message )
-   {
-      // valid move occurred
-      if ( message.equals( "Valid move." ) ) 
-      {
-         displayMessage( "Valid move, please wait.\n" );
-         setMark( currentSquare, myMark ); // set mark in square
-      } // end if
-      else if ( message.equals( "Invalid move, try again" ) ) 
-      {
-         displayMessage( message + "\n" ); // display invalid move
-         myTurn = true; // still this client's turn
-      } // end else if
-      else if ( message.equals( "Opponent moved" ) ) 
-      {
-         int location = input.nextInt(); // get move location
-         input.nextLine(); // skip newline after int location
-         int row = location / 3; // calculate row
-         int column = location % 3; // calculate column
+      gameLock.lock(); // lock game to signal player X's thread
 
-         setMark(  board[ row ][ column ], 
-            ( myMark.equals( X_MARK ) ? O_MARK : X_MARK ) ); // mark move                
-         displayMessage( "Opponent moved. Your turn.\n" );
-         myTurn = true; // now this client's turn
-      } // end else if
-      else
-         displayMessage( message + "\n" ); // display the message
-   } // end method processMessage
-
-   // manipulate displayArea in event-dispatch thread
+      try
+      {
+         players[ PLAYER_X ].setSuspended( false ); // resume player X
+         otherPlayerConnected.signal(); // wake up player X's thread
+      } // end try
+      finally
+      {
+         gameLock.unlock(); // unlock game after signalling player X
+      } // end finally
+   } // end method execute
+   
+   // display message in outputArea
    private void displayMessage( final String messageToDisplay )
    {
+      // display message from event-dispatch thread of execution
       SwingUtilities.invokeLater(
          new Runnable() 
          {
-            public void run() 
+            public void run() // updates outputArea
             {
-               displayArea.append( messageToDisplay ); // updates output
-            } // end method run
-         }  // end inner class
+               outputArea.append( messageToDisplay ); // add message
+            } // end  method run
+         } // end inner class
       ); // end call to SwingUtilities.invokeLater
    } // end method displayMessage
 
-   // utility method to set mark on board in event-dispatch thread
-   private void setMark( final Square squareToMark, final String mark )
+   // determine if move is valid
+   public boolean validateAndMove( int location, int player )
    {
-      SwingUtilities.invokeLater(
-         new Runnable() 
+      // while not current player, must wait for turn
+      while ( player != currentPlayer ) 
+      {
+         gameLock.lock(); // lock game to wait for other player to go
+
+         try 
          {
-            public void run()
-            {
-               squareToMark.setMark( mark ); // set mark in square
-            } // end method run
-         } // end anonymous inner class
-      ); // end call to SwingUtilities.invokeLater
-   } // end method setMark
+            otherPlayerTurn.await(); // wait for player's turn
+         } // end try
+         catch ( InterruptedException exception )
+         {
+            exception.printStackTrace();
+         } // end catch
+         finally
+         {
+            gameLock.unlock(); // unlock game after waiting
+         } // end finally
+      } // end while
 
-   // send message to server indicating clicked square
-   public void sendClickedSquare( int location )
-   {
-      // if it is my turn
-      if ( myTurn ) 
+      // if location not occupied, make move
+      if ( !isOccupied( location ) )
       {
-         output.format( "%d\n", location ); // send location to server
-         output.flush();
-         myTurn = false; // not my turn any more
+         board[ location ] = MARKS[ currentPlayer ]; // set move on board
+         currentPlayer = ( currentPlayer + 1 ) % 2; // change player
+
+         // let new current player know that move occurred
+         players[ currentPlayer ].otherPlayerMoved( location );
+
+         gameLock.lock(); // lock game to signal other player to go
+
+         try 
+         {
+            otherPlayerTurn.signal(); // signal other player to continue
+         } // end try
+         finally
+         {
+            gameLock.unlock(); // unlock game after signaling
+         } // end finally
+
+         return true; // notify player that move was valid
       } // end if
-   } // end method sendClickedSquare
+      else // move was not valid
+         return false; // notify player that move was invalid
+   } // end method validateAndMove
 
-   // set current Square
-   public void setCurrentSquare( Square square )
+   // determine whether location is occupied
+   public boolean isOccupied( int location )
    {
-      currentSquare = square; // set current square to argument
-   } // end method setCurrentSquare
+//	   if(board[ location ].equals( MARKS[ PLAYER_X ] ) && check == 1|| 
+//	         board [ location ].equals( MARKS[ PLAYER_O ] ) && check == 1 )
+//	   return false;	//for the restart/////////////////////////////////////////////////////////////////
+	   if ( board[ location ].equals( MARKS[ PLAYER_X ] ) || 
+         board [ location ].equals( MARKS[ PLAYER_O ] ) )
+         return true; // location is occupied
+      else
+         return false; // location is not occupied
+   } // end method isOccupied
+   // place code in this method to determine whether game over 
+   public boolean isGameOver()
+   {
+      return false; // this is left as an exercise
+   } // end method isGameOver
 
-   // private inner class for the squares on the board
-   private class Square extends JPanel 
+   // private inner class Player manages each Player as a runnable
+   private class Player implements Runnable 
    {
-      private String mark; // mark to be drawn in this square
-      private int location; // location of square
-   
-      public Square( String squareMark, int squareLocation )
+      private Socket connection; // connection to client
+      private Scanner input; // input from client
+      private Formatter output; // output to client
+      private int playerNumber; // tracks which player this is
+      private String mark; // mark for this player
+      private boolean suspended = true; // whether thread is suspended
+
+      // set up Player thread
+      public Player( Socket socket, int number )
       {
-         mark = squareMark; // set mark for this square
-         location = squareLocation; // set location of this square
+         playerNumber = number; // store this player's number
+         mark = MARKS[ playerNumber ]; // specify player's mark
+         connection = socket; // store socket for client
+         
+         try // obtain streams from Socket
+         {
+            input = new Scanner( connection.getInputStream() );
+            output = new Formatter( connection.getOutputStream() );
+         } // end try
+         catch ( IOException ioException ) 
+         {
+            ioException.printStackTrace();
+            System.exit( 1 );
+         } // end catch
+      } // end Player constructor
 
-         addMouseListener( 
-            new MouseAdapter() 
+      // send message that other player moved
+      public void otherPlayerMoved( int location )
+      {
+         output.format( "Opponent moved\n" );
+         output.format( "%d\n", location ); // send location of move
+         output.flush(); // flush output
+      } // end method otherPlayerMoved
+
+      // control thread's execution
+      public void run()
+      {
+         // send client its mark (X or O), process messages from client
+         try 
+         {
+        	 
+            displayMessage( "Player " + mark + " connected\n" );
+            output.format( "%s\n", mark ); // send player's mark
+            output.flush(); // flush output
+
+            // if player X, wait for another player to arrive
+            if ( playerNumber == PLAYER_X ) 
             {
-               public void mouseReleased( MouseEvent e )
+               output.format( "%s\n%s", "Player X connected",
+                  "Waiting for another player\n" );
+               output.flush(); // flush output
+
+               gameLock.lock(); // lock game to  wait for second player
+
+               try 
                {
-                  setCurrentSquare( Square.this ); // set current square
+                  while( suspended )
+                  {
+                     otherPlayerConnected.await(); // wait for player O
+                  } // end while
+               } // end try 
+               catch ( InterruptedException exception ) 
+               {
+                  exception.printStackTrace();
+               } // end catch
+               finally
+               {
+                  gameLock.unlock(); // unlock game after second player
+               } // end finally
 
-                  // send location of this square
-                  sendClickedSquare( getSquareLocation() );
-               } // end method mouseReleased
-            } // end anonymous inner class
-         ); // end call to addMouseListener
-      } // end Square constructor
+               // send message that other player connected
+               output.format( "Other player connected. Your move.\n" );
+               output.flush(); // flush output
+            } // end if
+            else
+            {
+               output.format( "Player O connected, please wait\n" );
+               output.flush(); // flush output
+            } // end else
 
-      // return preferred size of Square
-      public Dimension getPreferredSize() 
-      { 
-         return new Dimension( 30, 30 ); // return preferred size
-      } // end method getPreferredSize
+            // while game not over
+            while ( !isGameOver() ) 
+            {
+               int location = 0; // initialize move location
+               String c = " "; 
 
-      // return minimum size of Square
-      public Dimension getMinimumSize() 
+               if ( input.hasNext() )
+                  location = input.nextInt(); // get move location
+               else
+            	   if(input.hasNextLine())
+            		   c = input.nextLine();
+
+               
+               if(c.equals("Reset"))
+               {
+            		   SReset();
+               }
+
+               // check for valid move
+               if ( validateAndMove( location, playerNumber ) ) 
+               {
+                  displayMessage( "\nlocation: " + location );
+                  output.format( "Valid move.\n" ); // notify client
+                  output.flush(); // flush output
+
+                 
+               } // end if
+               else // move was invalid
+               {
+                  output.format( "Invalid move, try again\n" );
+                  output.flush(); // flush output
+               } // end else
+            } // end while
+            
+//            if(check == 1)
+//            {
+//          	  System.out.println("hello");
+//          	  SReset();
+//                check = 0;;
+//            }
+            
+            ////////////////////////////////////////////////////////////////////use this for the restart
+         } // end try
+         finally
+         {
+            try
+            {
+               connection.close(); // close connection to client
+            } // end try
+            catch ( IOException ioException ) 
+            {
+               ioException.printStackTrace();
+               System.exit( 1 );
+            } // end catch
+         } // end finally
+      } // end method run
+
+      // set whether or not thread is suspended
+      public void setSuspended( boolean status )
       {
-         return getPreferredSize(); // return preferred size
-      } // end method getMinimumSize
-
-      // set mark for Square
-      public void setMark( String newMark ) 
-      { 
-         mark = newMark; // set mark of square
-         repaint(); // repaint square
-      } // end method setMark
+         suspended = status; // set value of suspended
+      } // end method setSuspended
+   } // end class Player
    
-      // return Square location
-      public int getSquareLocation() 
-      {
-         return location; // return location of square
-      } // end method getSquareLocation
    
-      // draw Square
-      public void paintComponent( Graphics g )
-      {
-         super.paintComponent( g );
-
-         g.drawRect( 0, 0, 29, 29 ); // draw square
-         g.drawString( mark, 11, 20 ); // draw mark   
-      } // end method paintComponent
-   } // end inner-class Square
-   
-   public void Restart() // for resesting
+   public void SReset()
    {
-	   System.out.println("hi");
-		   boardPanel.removeAll();
-		   boardPanel.updateUI();  
-		   	// loop over the rows in the board
-		   	      for ( int row = 0; row < board.length; row++ ) 
-		   	      {
-		   	         // loop over the columns in the board
-		   	         for ( int column = 0; column < board[ row ].length; column++ ) 
-		   	         {
-		   	            // create square
-		   	            board[ row ][ column ] = new Square( " ", row * 3 + column );
-		   	            boardPanel.add( board[ row ][ column ] ); // add square       
-		   	         } // end inner for
-		   	      } // end outer for  
-		   	      
-		   	      output.flush();
-	   
+	   System.out.println("hello");
+       for ( int i = 0; i < 9; i++ )
+           board[ i ] = new String( "" ); // create tic-tac-toe board
+
    }
-  
    
-} // end class TicTacToeClient
+   
+   ////////////////////////////////////////////////////////////////////////////
+//   public void setCheck(int c)
+//   {
+//	   check = c;
+//   }
+//   public int getCheck()
+//   {
+//	   return check;
+//   }
+   
+} // end class TicTacToeServer
+
 
 /**************************************************************************
  * (C) Copyright 1992-2012 by Deitel & Associates, Inc. and               *
