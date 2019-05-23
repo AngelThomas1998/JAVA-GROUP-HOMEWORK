@@ -11,8 +11,10 @@ import java.awt.event.MouseEvent;
 import java.net.Socket;
 import java.net.InetAddress;
 import java.io.IOException;
-
-import javax.swing.JButton;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JMenuBar;
+//import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -24,6 +26,7 @@ import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 
+@SuppressWarnings("serial")
 public class TicTacToeClient extends JFrame implements Runnable 
 {
    private JTextField idField; // textfield to display player's mark
@@ -40,11 +43,40 @@ public class TicTacToeClient extends JFrame implements Runnable
    private boolean myTurn; // determines which client's turn it is
    private final String X_MARK = "X"; // mark for first client
    private final String O_MARK = "O"; // mark for second client
-   private JButton restart;
+   //private JButton restart;
 
    // set up user-interface and board
    public TicTacToeClient( String host )
    { 
+	  // Albert Edit begin->
+	  // Add menu bar here:
+	  super("TicTacToeClient.exe.");
+	    
+	  JMenu fileMenu = new JMenu( "File" );	// create file menu
+	  fileMenu.setMnemonic( 'F' );	// set mnemonic to F
+      
+	  // create Exit button
+	  JMenuItem exitItem = new JMenuItem( "Exit" ); // create exit item
+      exitItem.setMnemonic( 'x' ); // set mnemonic to x
+      fileMenu.add( exitItem ); // add exit item to file menu
+      exitItem.addActionListener(
+
+         new ActionListener() // anonymous inner class
+         {  
+            // terminate application when user clicks exitItem
+            public void actionPerformed( ActionEvent event )
+            {
+               System.exit( 0 ); // exit application
+            } // end method actionPerformed
+         } // end anonymous inner class
+      ); // end call to addActionListener
+      JMenuBar bar = new JMenuBar();	// Create Menu bar
+      setJMenuBar( bar );	// add menu bar to app
+      bar.add( fileMenu );	// add file menu to menu bar
+	    
+	/*check java program that uses menu frames ex: CH.25 13-14*/
+	// End Albert Edit
+	    
       ticTacToeHost = host; // set name of server
       displayArea = new JTextArea( 4, 30 ); // set up JTextArea
       displayArea.setEditable( false );
@@ -79,7 +111,7 @@ public class TicTacToeClient extends JFrame implements Runnable
        * client-side restart code goes here?
        */
       
-      setSize( 300, 225 ); // set size of window
+      setSize( 300, 250 ); // set size of window
       setVisible( true ); // show window
 
       startClient();
