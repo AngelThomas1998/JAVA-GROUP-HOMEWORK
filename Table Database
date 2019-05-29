@@ -33,10 +33,29 @@ CREATE TABLE `consecutive wins` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
+--
+-- Table structure for table `username`
+--
+
+CREATE TABLE `username` (
+  `Username` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `table`
+-- Table structure for table `win ratio %`
 --
+
+CREATE TABLE `win ratio %` (
+  `Win Ratio %` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
 
 CREATE TABLE `table` (
   `Username` int(11) NOT NULL,
