@@ -33,7 +33,9 @@ public class TicTacToeServer extends JFrame
   // private checkMethod cm = new checkMethod();
    
    
-   private int check;
+  // private int check;
+   
+ //  private String[] check = new String[10];
 
    // set up tic-tac-toe server and GUI that displays messages
    public TicTacToeServer()
@@ -274,34 +276,37 @@ public class TicTacToeServer extends JFrame
             while ( !isGameOver() ) 
             {
                int location = 0; // initialize move location
-               String c = " "; 
+               int check = 0;
+              // String c = " "; 
 
                if ( input.hasNext() )
-                  location = input.nextInt(); // get move location
-               else
-            	   if(input.hasNextLine())
-            		   c = input.nextLine();
-
+                  check = input.nextInt(); // get move location
                
-               if(c.equals("Reset"))
+               if(check < 9)//////////////////////////////////////////////////////////////////////////////////////
                {
-            		   SReset();
+            	   location = check;
+            	   
+                   if ( validateAndMove( location, playerNumber ) ) 
+                   {
+                      displayMessage( "\nlocation: " + location );
+                      output.format( "Valid move.\n" ); // notify client
+                      output.flush(); // flush output
+
+                     
+                   } // end if
+                   else // move was invalid
+                   {
+                      output.format( "Invalid move, try again\n" );
+                      output.flush(); // flush output
+                   } // end else
                }
 
                // check for valid move
-               if ( validateAndMove( location, playerNumber ) ) 
-               {
-                  displayMessage( "\nlocation: " + location );
-                  output.format( "Valid move.\n" ); // notify client
-                  output.flush(); // flush output
 
-                 
-               } // end if
-               else // move was invalid
+               if(check == 9)//////////////////////////////////////////////////////////////////////////////
                {
-                  output.format( "Invalid move, try again\n" );
-                  output.flush(); // flush output
-               } // end else
+            		   SReset();
+               }
             } // end while
             
 //            if(check == 1)
@@ -335,9 +340,9 @@ public class TicTacToeServer extends JFrame
    } // end class Player
    
    
-   public void SReset()
+   public void SReset()///////////////////////////////////////////////////////////////////////
    {
-	   System.out.println("hello");
+	  // System.out.println("hello");
        for ( int i = 0; i < 9; i++ )
            board[ i ] = new String( "" ); // create tic-tac-toe board
 
