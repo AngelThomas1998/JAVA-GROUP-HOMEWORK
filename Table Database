@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 20, 2019 at 11:45 PM
+-- Generation Time: May 29, 2019 at 10:32 PM
 -- Server version: 10.1.32-MariaDB
 -- PHP Version: 7.2.5
 
@@ -19,7 +19,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `table`
+-- Database: `tictacttoe`
 --
 
 -- --------------------------------------------------------
@@ -29,38 +29,11 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `consecutive wins` (
-  `Consecutive Wins` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
---
--- Table structure for table `username`
---
-
-CREATE TABLE `username` (
-  `Username` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `win ratio %`
---
-
-CREATE TABLE `win ratio %` (
-  `Win Ratio %` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-
-
-CREATE TABLE `table` (
-  `Username` int(11) NOT NULL,
-  `Consecutive Wins` int(11) NOT NULL,
-  `Win Ratio %` int(11) NOT NULL
+  `1` int(11) NOT NULL,
+  `2` int(11) NOT NULL,
+  `3` int(11) NOT NULL,
+  `4` int(11) NOT NULL,
+  `5` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -70,7 +43,11 @@ CREATE TABLE `table` (
 --
 
 CREATE TABLE `username` (
-  `Username` int(11) NOT NULL
+  `1` int(11) NOT NULL,
+  `2` int(11) NOT NULL,
+  `3` int(11) NOT NULL,
+  `4` int(11) NOT NULL,
+  `5` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -80,10 +57,10 @@ CREATE TABLE `username` (
 --
 
 CREATE TABLE `win ratio %` (
-  `Win Ratio %` int(11) NOT NULL
+  `1` int(11) NOT NULL,
+  `2` int(11) NOT NULL,
+  `3` int(11) NOT NULL,
+  `4` int(11) NOT NULL,
+  `5` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
