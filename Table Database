@@ -1,32 +1,9 @@
--- phpMyAdmin SQL Dump
--- version 4.8.0.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Generation Time: May 29, 2019 at 10:32 PM
--- Server version: 10.1.32-MariaDB
--- PHP Version: 7.2.5
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: `tictacttoe`
---
-
--- --------------------------------------------------------
-
---
--- Table structure for table `consecutive wins`
---
+CREATE DATABASE tictactoe;
 
 CREATE TABLE `consecutive wins` (
   `1` int(11) NOT NULL,
@@ -36,12 +13,6 @@ CREATE TABLE `consecutive wins` (
   `5` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `username`
---
-
 CREATE TABLE `username` (
   `1` int(11) NOT NULL,
   `2` int(11) NOT NULL,
@@ -49,12 +20,6 @@ CREATE TABLE `username` (
   `4` int(11) NOT NULL,
   `5` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `win ratio %`
---
 
 CREATE TABLE `win ratio %` (
   `1` int(11) NOT NULL,
@@ -64,3 +29,22 @@ CREATE TABLE `win ratio %` (
   `5` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 COMMIT;
+
+
+INSERT INTO consecutive wins (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO consecutive wins (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO consecutive wins (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO consecutive wins (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO consecutive wins (column1, column2, column3, column4, column5) VALUES ();
+
+INSERT INTO username (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO username (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO username (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO username (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO username (column1, column2, column3, column4, column5) VALUES ();
+
+INSERT INTO win ratio % (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO win ratio % (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO win ratio % (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO win ratio % (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO win ratio % (column1, column2, column3, column4, column5) VALUES ();
