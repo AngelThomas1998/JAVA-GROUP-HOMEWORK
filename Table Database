@@ -1,3 +1,12 @@
+-- phpMyAdmin SQL Dump
+-- version 4.8.0.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: May 29, 2019 at 10:32 PM
+-- Server version: 10.1.32-MariaDB
+-- PHP Version: 7.2.5
+
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
@@ -21,7 +30,7 @@ CREATE TABLE `username` (
   `5` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE `win ratio %` (
+CREATE TABLE `turns to win` (
   `1` int(11) NOT NULL,
   `2` int(11) NOT NULL,
   `3` int(11) NOT NULL,
@@ -43,8 +52,12 @@ INSERT INTO username (column1, column2, column3, column4, column5) VALUES ();
 INSERT INTO username (column1, column2, column3, column4, column5) VALUES ();
 INSERT INTO username (column1, column2, column3, column4, column5) VALUES ();
 
-INSERT INTO win ratio % (column1, column2, column3, column4, column5) VALUES ();
-INSERT INTO win ratio % (column1, column2, column3, column4, column5) VALUES ();
-INSERT INTO win ratio % (column1, column2, column3, column4, column5) VALUES ();
-INSERT INTO win ratio % (column1, column2, column3, column4, column5) VALUES ();
-INSERT INTO win ratio % (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO turns to win (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO turns to win (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO turns to win (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO turns to win (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO turns to win (column1, column2, column3, column4, column5) VALUES ();
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
