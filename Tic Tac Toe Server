@@ -14,12 +14,10 @@ import java.util.concurrent.locks.Condition;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-//import javax.swing.JOptionPane;
 
 @SuppressWarnings("serial")
 public class TicTacToeServer extends JFrame 
 {
-	//private String userInput;	// Angel's Edit
 	private String[] board = new String[ 9 ]; // tic-tac-toe board
 	private JTextArea outputArea; // for outputting moves
 	private Player[] players; // array of Players
@@ -53,21 +51,6 @@ public class TicTacToeServer extends JFrame
       
       players = new Player[ 2 ]; // create array of players
       currentPlayer = PLAYER_X; // set current player to first player
-      // Angel's Edit
-//      userInput = JOptionPane.showInputDialog("Please input if you would like to be player X or player O");
-//      if (userInput == "X" || userInput == "x")
-//      {
-//     	 currentPlayer = PLAYER_X;
-//      }
-//      else if (userInput == "O" || userInput == "o")
-//      {
-//     	 currentPlayer = PLAYER_O;
-//      }
-//      else 
-//      {
-//     	 JOptionPane.showInputDialog("Please input a proper value in caps from X and O");
-//      }
-     // end Angel's edit
       
       try
       {
@@ -206,7 +189,6 @@ public class TicTacToeServer extends JFrame
 	    * ^ checks each possible combination of win conditions
 	    * will return if any is met.
 	    */
-	    // Database implementation
 	   // if the boolean is set to be true then the increment counter for that 
 	   // specific winner will go up by one
    }
@@ -222,7 +204,6 @@ public class TicTacToeServer extends JFrame
 		   }
 	   }
 	   return true;
-	   // Database implementation
 	   // if board is filled the increment count for the total number of games will be incremented by 1
    }
    
@@ -320,38 +301,44 @@ public class TicTacToeServer extends JFrame
             while ( !isGameOver() ) 
             {
                int location = 0;	// initialize move location
+               // Brandon Edit start
+               int check = 0;		// set a check for the restart button.
 
                if ( input.hasNext() )
-                  location = input.nextInt();	// get move location
-
-               // check for valid move
-               if ( validateAndMove( location, playerNumber ) ) 
+                  check = input.nextInt();	// get move location
+               
+               if (check < 9)	// separate check for the input to acknowledge the reset action
                {
-                  displayMessage( "\nlocation: " + location );
-                  output.format( "Valid move.\n" ); // notify client
-                  output.flush();	// flush output
-                  output.format(hasWinner() ? "Victory\n" : boardFilled() ? "Draw\n" : "");
-                  output.flush();	// flush output
-               } // end if
-               else // move was invalid
+            	   location = check;
+            	   
+            	   // check for valid move
+                   if ( validateAndMove( location, playerNumber ) ) 
+                   {
+                      displayMessage( "\nlocation: " + location );
+                      output.format( "Valid move.\n" ); // notify client
+                      output.flush();	// flush output
+                      output.format(hasWinner() ? "Victory\n" : boardFilled() ? "Draw\n" : "");
+                      output.flush();	// flush output
+                   } // end if
+                   
+                   else // move was invalid
+                   {
+                      output.format( "Invalid move, try again\n" );
+                      output.flush(); // flush output
+                   } // end else            		   
+               }	// end if
+               
+               // if statement for reset.
+               if (check == 9)
                {
-                  output.format( "Invalid move, try again\n" );
-                  output.flush(); // flush output
-               } // end else
+            	   SReset();
+               }	// Brandon Edit end
             } // end while
-            /*
-             *  add loop here for restart/ terminate?
-             */
          } // end try
          finally
          {
             try
             {
-            	/*
-            	 * could we put the restart code/
-            	 * play again code here?
-            	 * 
-            	 */
                connection.close(); // close connection to client
             } // end try
             catch ( IOException ioException ) 
@@ -368,4 +355,12 @@ public class TicTacToeServer extends JFrame
          suspended = status; // set value of suspended
       } // end method setSuspended
    } // end class Player
+
+   // Brandon Edit
+   // reset code to clear the board
+	public void SReset()
+	{
+		for (int i= 0; i < 9; i ++)
+			board[ i ] = new String( "" );	// recreate tic-tac-toe board
+	}	// end SReset method
 } // end class TicTacToeServer
