@@ -292,8 +292,8 @@ public class TicTacToeClient extends JFrame implements Runnable
    {
 	   //System.out.println("hi");
 
-//			output.format(" ", "Reset");
-//			output.flush();
+			output.format("%d\n", 9);
+			output.flush();
 	      
 		   boardPanel.removeAll();
 		   boardPanel.updateUI();  
