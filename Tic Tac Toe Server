@@ -12,9 +12,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Condition;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-
+import java.sql.*;
+import java.util.*;
 @SuppressWarnings("serial")
 public class TicTacToeServer extends JFrame 
 {
@@ -30,12 +32,20 @@ public class TicTacToeServer extends JFrame
 	private Lock gameLock; // to lock game for synchronization
 	private Condition otherPlayerConnected; // to wait for other player
 	private Condition otherPlayerTurn; // to wait for other player's turn
-
+	int counter;
+	String Username1;
+	String Username2;
+	String DatabaseURL =  "insert the url in here after finding it from the phpmyadmin";
+	String DriverName = "insert driver name here";
+	String USER = "root";
+	String PASS = "";
    // set up tic-tac-toe server and GUI that displays messages
    public TicTacToeServer()
    {
       super( "Tic-Tac-Toe Server" ); // set title of window
-
+      JOptionPane.showInputDialog("{Please input player ones name" + Username1);
+      JOptionPane.showInputDialog("Please input player 2's name" + Username2);
+      counter = 0;
       // create ExecutorService with a thread for each player
       runGame = Executors.newFixedThreadPool( 2 );
       gameLock = new ReentrantLock(); // create lock for game
@@ -177,6 +187,8 @@ public class TicTacToeServer extends JFrame
    // checks if there are 3 of the same marks in a row
    public boolean hasWinner()
    {
+	   //angel edit, makes it so that it keeps track of the total number of turns
+	   counter = counter + 1;
 	   return (!board[0].isEmpty() && board[0].equals(board[1]) && board[0].equals(board[2]))
                || (!board[3].isEmpty() && board[3].equals(board[4]) && board[3].equals(board[5]))
                || (!board[6].isEmpty() && board[6].equals(board[7]) && board[6].equals(board[8]))
@@ -213,6 +225,11 @@ public class TicTacToeServer extends JFrame
       return hasWinner() || boardFilled();
    } // end method isGameOver
 
+	
+	
+	
+	
+
    // private inner class Player manages each Player as a runnable
    private class Player implements Runnable 
    {
@@ -248,7 +265,7 @@ public class TicTacToeServer extends JFrame
          output.format( "Opponent moved\n" );
          output.format( "%d\n", location ); // send location of move
          output.flush();	// flush output
-         output.format(hasWinner() ? "Defeat\n" : boardFilled() ? "Draw\n" : "");
+         output.format(hasWinner() ? "Defeat\n" : boardFilled() ? "Draw\n" : "the total number of turns needed to win was " + counter);
          output.flush();	// flush output
       } // end method otherPlayerMoved
 
@@ -338,7 +355,8 @@ public class TicTacToeServer extends JFrame
          finally
          {
             try
-            {
+            {	//Angel edit try this so that riight before it closes it'll send all the information to the database
+            	String sql = "Putting data of user into the base(username, turns to win,) + VALUES(Username1, counter) ";
                connection.close(); // close connection to client
             } // end try
             catch ( IOException ioException ) 
