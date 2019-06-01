@@ -40,11 +40,11 @@ CREATE TABLE `turns to win` (
 COMMIT;
 
 
-INSERT INTO consecutive wins (column1, column2, column3, column4, column5) VALUES ();
-INSERT INTO consecutive wins (column1, column2, column3, column4, column5) VALUES ();
-INSERT INTO consecutive wins (column1, column2, column3, column4, column5) VALUES ();
-INSERT INTO consecutive wins (column1, column2, column3, column4, column5) VALUES ();
-INSERT INTO consecutive wins (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO consecutive_wins (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO consecutive_wins (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO consecutive_wins (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO consecutive_wins (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO consecutive_wins (column1, column2, column3, column4, column5) VALUES ();
 
 INSERT INTO username (column1, column2, column3, column4, column5) VALUES ();
 INSERT INTO username (column1, column2, column3, column4, column5) VALUES ();
@@ -52,11 +52,11 @@ INSERT INTO username (column1, column2, column3, column4, column5) VALUES ();
 INSERT INTO username (column1, column2, column3, column4, column5) VALUES ();
 INSERT INTO username (column1, column2, column3, column4, column5) VALUES ();
 
-INSERT INTO turns to win (column1, column2, column3, column4, column5) VALUES ();
-INSERT INTO turns to win (column1, column2, column3, column4, column5) VALUES ();
-INSERT INTO turns to win (column1, column2, column3, column4, column5) VALUES ();
-INSERT INTO turns to win (column1, column2, column3, column4, column5) VALUES ();
-INSERT INTO turns to win (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO turns_to_win (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO turns_to_win (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO turns_to_win (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO turns_to_win (column1, column2, column3, column4, column5) VALUES ();
+INSERT INTO turns_to_win (column1, column2, column3, column4, column5) VALUES ();
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
