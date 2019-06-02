@@ -29,13 +29,6 @@ public class TicTacToeServer extends JFrame
    private Lock gameLock; // to lock game for synchronization
    private Condition otherPlayerConnected; // to wait for other player
    private Condition otherPlayerTurn; // to wait for other player's turn
-   
-  // private checkMethod cm = new checkMethod();
-   
-   
-  // private int check;
-   
- //  private String[] check = new String[10];
 
    // set up tic-tac-toe server and GUI that displays messages
    public TicTacToeServer()
@@ -174,9 +167,6 @@ public class TicTacToeServer extends JFrame
    // determine whether location is occupied
    public boolean isOccupied( int location )
    {
-//	   if(board[ location ].equals( MARKS[ PLAYER_X ] ) && check == 1|| 
-//	         board [ location ].equals( MARKS[ PLAYER_O ] ) && check == 1 )
-//	   return false;	//for the restart/////////////////////////////////////////////////////////////////
 	   if ( board[ location ].equals( MARKS[ PLAYER_X ] ) || 
          board [ location ].equals( MARKS[ PLAYER_O ] ) )
          return true; // location is occupied
@@ -225,6 +215,22 @@ public class TicTacToeServer extends JFrame
          output.format( "%d\n", location ); // send location of move
          output.flush(); // flush output
       } // end method otherPlayerMoved
+      public void otherPlayerReset()
+      {
+    	  output.format( "Please confirm Restart\n" );
+    	  output.flush();
+      }
+      ////////////////////////////////////////////////////////////////////////////////////////////////
+      public void otherPlayerR2()  //both to send the appropriate message to the right client
+      {
+    	  output.format( "Opponent's turn\n" );
+    	  output.flush();
+      }
+      public void otherPlayerR3()
+      {
+    	  output.format( "Your turn\n" );
+    	  output.flush();
+      }
 
       // control thread's execution
       public void run()
@@ -277,12 +283,13 @@ public class TicTacToeServer extends JFrame
             {
                int location = 0; // initialize move location
                int check = 0;
+              // int limit = 0;
               // String c = " "; 
 
                if ( input.hasNext() )
                   check = input.nextInt(); // get move location
                
-               if(check < 9)//////////////////////////////////////////////////////////////////////////////////////
+               if(check < 9)///////////////////////////////////////////////////
                {
             	   location = check;
             	   
@@ -305,18 +312,36 @@ public class TicTacToeServer extends JFrame
 
                if(check == 9)//////////////////////////////////////////////////////////////////////////////
                {
-            		   SReset();
+            	   output.format("Wait for opponent to reset game\n"); // send message for reset
+            	   output.flush();
+            	   
+            	   players[currentPlayer].otherPlayerReset();
+            	   
                }
+               else if(check == 10)///////////////////////////////////////////
+               {
+            	   if(currentPlayer == PLAYER_X) // this is set to have x be first after reset
+            	   {
+                	   output.format("Your turn\n");
+                	   output.flush();
+                	   
+                	   currentPlayer = ( currentPlayer + 1 ) % 2; // change player
+                	   players[currentPlayer].otherPlayerR2();//changing player makes it to send right message
+                	   SReset();
+            	   }
+            	   if(currentPlayer == PLAYER_O)
+            	   {
+                	   output.format("Opponent's turn\n");
+                	   output.flush();
+                	   
+                	   currentPlayer = ( currentPlayer + 1 ) % 2; // change player
+                	   players[currentPlayer].otherPlayerR3();
+                	   SReset();
+            	   }
+
+               }
+               
             } // end while
-            
-//            if(check == 1)
-//            {
-//          	  System.out.println("hello");
-//          	  SReset();
-//                check = 0;;
-//            }
-            
-            ////////////////////////////////////////////////////////////////////use this for the restart
          } // end try
          finally
          {
@@ -340,24 +365,12 @@ public class TicTacToeServer extends JFrame
    } // end class Player
    
    
-   public void SReset()///////////////////////////////////////////////////////////////////////
+   public void SReset()
    {
-	  // System.out.println("hello");
        for ( int i = 0; i < 9; i++ )
            board[ i ] = new String( "" ); // create tic-tac-toe board
 
    }
-   
-   
-   ////////////////////////////////////////////////////////////////////////////
-//   public void setCheck(int c)
-//   {
-//	   check = c;
-//   }
-//   public int getCheck()
-//   {
-//	   return check;
-//   }
    
 } // end class TicTacToeServer
 
