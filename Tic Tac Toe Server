@@ -21,6 +21,7 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class TicTacToeServer extends JFrame 
 {
+	
 	private String[] board = new String[ 9 ]; // tic-tac-toe board
 	private JTextArea outputArea; // for outputting moves
 	private Player[] players; // array of Players
@@ -47,9 +48,7 @@ public class TicTacToeServer extends JFrame
    {
       super( "Tic-Tac-Toe Server" ); // set title of window
     
-      Username1 = JOptionPane.showInputDialog("Please input player 1's name");	// store user's name
-      Username2 = JOptionPane.showInputDialog("Please input player 2's name");
-
+     
       // create ExecutorService with a thread for each player
       runGame = Executors.newFixedThreadPool( 2 );
       gameLock = new ReentrantLock(); // create lock for game
@@ -226,7 +225,18 @@ public class TicTacToeServer extends JFrame
    // determines whether game is won or game over 
    public boolean isGameOver()
    {
+	   if (hasWinner() == true)
+	      {
+	    	  JOptionPane.showInputDialog("We have a winner! it took them a total of " + counter);
+	    	  gameLock.lock();
+	      }
+	   else if (boardFilled() == true)
+	   {
+		   JOptionPane.showInputDialog("We have a draw there is no winner this match");
+		   gameLock.lock();
+	   }
       return hasWinner() || boardFilled();
+     
    } // end method isGameOver
 
    // private inner class Player manages each Player as a runnable
@@ -269,7 +279,41 @@ public class TicTacToeServer extends JFrame
          	+ " of turns needed to win was " + counter + "\n");	// Angel Edit
          output.flush();	// flush output
       } // end method otherPlayerMoved
-
+      
+      private Connection connect() 
+      {
+     	 String url = "jdbc:mysql://localhost/tictactoe";
+     	 Connection conn = null;
+     	 try
+     	 {
+     		conn = DriverManager.getConnection(url);
+     	 }
+     	 catch (SQLException e) {
+     		 System.out.println("Invalid url could not connect to the database");
+     	 }
+     	 return conn;
+     	 
+      }
+      private String getUsername(String Username)
+      {
+    	  
+    	  Username = Username1;
+    	  return Username;
+      }
+      public String Insert(String name, int turns)
+      {
+    	  Username1 = name;
+    	  String sql = "Insert into 'winners'(username,turns) VALUES(name, counter)";
+    	  try
+    	  
+    		  (Connection conn = this.connect();
+              PreparedStatement State = conn.prepareStatement(sql)) {
+          
+      } catch (SQLException e) {
+          System.out.println("Invalid values put into the the system");
+      }
+    	  return name;
+      }
       // control thread's execution
       public void run()
       {
@@ -336,9 +380,11 @@ public class TicTacToeServer extends JFrame
                       output.format( "Valid move.\n" ); // notify client
                       output.flush();
                       output.format(hasWinner() ? "Victory\nThe total number" + 
-                      	 " of turns needed to win was " + counter + "\n" : boardFilled() ? "Draw\n" : "The"
+                      	 " of turns needed to win was " + counter + "\n" + getUsername(Username1) + Insert(Username1, counter) : boardFilled() ? "Draw\n" : "The"
                       	 		+ " total number of turns needed to win was " + counter + "\n");	// Angel Edit
-                      output.flush();	// flush output
+                      connect();//will connect to the database here
+                      output.flush();
+                      // flush output
                    } // end if
                    
                    else // move was invalid
@@ -359,8 +405,7 @@ public class TicTacToeServer extends JFrame
          {
             try
             { //Angel edit try this so that right before it closes it'll send all the information to the database
-               String sql = "Putting data of user into the base(username, turns to win,) "
-            	+ "+ VALUES(Username1, counter) ";	
+             
                connection.close(); // close connection to client
             } // end try
             catch ( IOException ioException ) 
