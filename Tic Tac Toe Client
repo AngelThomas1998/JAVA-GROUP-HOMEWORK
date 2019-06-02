@@ -44,9 +44,9 @@ public class TicTacToeClient extends JFrame implements Runnable
    private final String X_MARK = "X"; // mark for first client
    private final String O_MARK = "O"; // mark for second client
   
-   // Brandon Edits
-   private JButton restart;
-   //private String clearMark = "";
+   // Brandon Edit
+   private JButton restart;	// Button for resetting board visually
+   private JButton test;	// Button for resetting fully
 
    // set up user-interface and board
    public TicTacToeClient( String host )
@@ -118,10 +118,31 @@ public class TicTacToeClient extends JFrame implements Runnable
     	{
     		public void actionPerformed( ActionEvent event)
     		{
-    			Restart();	// will initiate the restart process
+    			output.format("%d\n", 9);	// Sends to server to activate confirm button on other client
+    			output.flush();
+    			Restart();	// resets board visually
     		}
     	}
-       );	// Brandon Edit end
+       );	
+      restart.setVisible(false);	// Makes restart button invisible for both clients
+      
+      test = new JButton("Confirm");
+      add(test, BorderLayout.EAST);
+      
+      test.addActionListener(
+    	new ActionListener()
+    	{
+    		public void actionPerformed( ActionEvent event)
+    		{
+    			Restart();	// resets board visually
+    			output.format("%d\n", 10);	// Sends to server to reset fully
+    			output.flush();
+    			test.setVisible(false);	// hides confirm button
+    		}
+    	}
+    	);
+      test.setVisible(false);
+      // Brandon Edit end
       
       setSize( 300, 250 ); // set size of window
       setVisible( true ); // show window
@@ -181,6 +202,31 @@ public class TicTacToeClient extends JFrame implements Runnable
    // process messages received by client
    private void processMessage( String message )
    {
+	  // Brandon Edit start
+	   if ( message.equals("Wait for opponent to reset game"))
+	   {
+		 // sends message to person who pushed button
+	   }
+	   else if ( message.equals("Please confirm Restart"))
+	   {
+		   // sends to other client to confirm reset
+		   test.setVisible(true);	// makes confirm button visible
+		   restart.setVisible(false);	// hides restart button
+	   }
+	   
+	   if ( message.equals("Your turn"))	// both reset both clients to have X go first
+	   {
+		   restart.setVisible(false);
+		   setResetTurn();
+	   }
+	   else
+		   if ( message.equals("Opponent's turn"))
+		   {
+			   restart.setVisible(false);
+			   setResetTurn();
+		   }
+	   // Brandon Edit end
+	   
       // valid move occurred
       if ( message.equals( "Valid move." ) ) 
       {
@@ -203,6 +249,13 @@ public class TicTacToeClient extends JFrame implements Runnable
             ( myMark.equals( X_MARK ) ? O_MARK : X_MARK ) ); // mark move                
          displayMessage( "Opponent moved. Your turn.\n" );
          myTurn = true; // now this client's turn
+
+         // Brandon Edit
+         // turns off restart button
+         if ( myTurn == true)
+         {
+        	 restart.setVisible(false);
+         }	
       } // end else if
 	  //Albert Edits
       else if ( message.equals("Defeat"))
@@ -262,6 +315,12 @@ public class TicTacToeClient extends JFrame implements Runnable
          output.format( "%d\n", location ); // send location to server
          output.flush();
          myTurn = false; // not my turn any more
+         
+         // Brandon Edit
+         if ( myTurn == false)	// Turns on restart button
+         {
+        	 restart.setVisible(true);
+         }
       } // end if
    } // end method sendClickedSquare
 
@@ -335,22 +394,40 @@ public class TicTacToeClient extends JFrame implements Runnable
    // Restart method to clear the board
    public void Restart()
    {
-	   output.format("%d\n",  9);	// send a 9 value over to the server side as the check value.
-	   output.flush();
-	   
-	   boardPanel.removeAll();	// removes all inputs on the board
-	   boardPanel.updateUI();	// updates the UI of the board
-	   		// loop over the rows in the board
-	   for (int row = 0; row < board.length; row++)
+	   try
 	   {
-		   //loop over the columns in the board
-		   for (int column = 0; column < board[ row ].length; column++)
+		   boardPanel.removeAll();	// removes all inputs on the board
+		   boardPanel.updateUI();	// updates the UI of the board
+		   
+		   // loop over the rows in the board
+		   for (int row = 0; row < board.length; row++)
 		   {
-			   // create square
-			   board[ row ][ column ] = new Square( " ", row * 3 + column );
-			   boardPanel.add( board[ row ][ column ] );	// add squares
-		   }	// end inner for loop
-	   }	// end outer for loop
+			   //loop over the columns in the board
+			   for (int column = 0; column < board[ row ].length; column++)
+			   {
+				   // create squares
+				   board[ row ][ column ] = new Square( " ", row * 3 + column );
+				   boardPanel.add( board[ row ][ column ] );	// add squares
+			   }	// end inner for loop
+		   }	// end outer for loop
+	   }
+	   catch (Exception e)
+	   {
+		   System.out.println("Error has occurred." + e);
+	   }
    }	// end Restart method
+   
+   public void setResetTurn()	// Sets X as the starting player
+   {
+	   if ( myMark.equals(X_MARK))
+	   {
+		   myTurn = true;
+	   }
+	   else
+		   if ( myMark.equals(O_MARK))
+		   {
+			   myTurn = false;
+		   }
+   }
    // Brandon Edit end
 } // end class TicTacToeClient
