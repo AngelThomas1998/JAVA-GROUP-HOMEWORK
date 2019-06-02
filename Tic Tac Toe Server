@@ -260,7 +260,7 @@ public class TicTacToeServer extends JFrame
          output.format( "Opponent moved\n");
          output.format( "%d\n", location ); // send location of move
          output.flush();
-         // This side will not show how many turns it took for the game to end in the text window.
+         // This side will rarely show how many turns it took for the game to end in the text window.
          output.format(hasWinner() ? "Defeat\nThe game has ended after " + counter + " turns." : boardFilled() ? "Draw\n" : "");	// Angel Edit
          output.flush();	// flush output
 
