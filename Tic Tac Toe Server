@@ -385,6 +385,7 @@ public class TicTacToeServer extends JFrame
                       	 " of turns needed to win was " + counter + "\n" + getUsername(Username1): boardFilled() ? "Draw\n" : "The"
                       	 		+ " total number of turns needed to win was " + counter + "\n");
                       Insert(Username1,counter);
+                      Username1 = "Hello";
                       TicTacToe new1 = new TicTacToe(Username1, stringcounter);
                       if (hasWinner() == true)
                     	  {// Angel Edit
