@@ -192,7 +192,6 @@ public class TicTacToeServer extends JFrame
    public boolean hasWinner()
    {
 	   // Angel Edit, makes it so that it keeps track of the total number of turns taken
-	   counter ++;
 	   return (!board[0].isEmpty() && board[0].equals(board[1]) && board[0].equals(board[2]))
                || (!board[3].isEmpty() && board[3].equals(board[4]) && board[3].equals(board[5]))
                || (!board[6].isEmpty() && board[6].equals(board[7]) && board[6].equals(board[8]))
@@ -400,6 +399,7 @@ public class TicTacToeServer extends JFrame
                       displayMessage( "\nlocation: " + location );
                       output.format( "Valid move.\n" ); // notify client
                       output.flush();
+                      counter++;
                       output.format(hasWinner() ? "Victory\nThe total number" + 
                       	 " of turns needed to win was " + counter + "\n" + getUsername(Username1): boardFilled() ? "Draw\n" : "The"
                       	 		+ " total number of turns needed to win was " + counter + "\n");
