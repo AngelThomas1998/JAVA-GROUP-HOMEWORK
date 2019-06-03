@@ -282,6 +282,25 @@ public class TicTacToeServer extends JFrame
          output.flush();	// flush output
       } // end method otherPlayerMoved
       
+   // Brandon Edit Begin
+      public void otherPlayerReset()
+      {
+    	  output.format( "Please confirm Restart\n" );
+    	  output.flush();
+      }
+   // both to send the appropriate message to the right client
+      public void otherPlayerR2()	
+      {
+    	  output.format( "Opponent's turn\n" );
+    	  output.flush();
+      }
+      public void otherPlayerR3()
+      {
+    	  output.format( "Your turn\n" );
+    	  output.flush();
+      }
+      // Brandon Edit End
+      
       private Connection connect() 
       {
      	 String url = "jdbc:mysql://localhost/tictactoe";
@@ -415,11 +434,35 @@ public class TicTacToeServer extends JFrame
                    } // end else            		   
                }	// end if
                
-               // if statement for reset.
+            // if statement for reset.
                if (check == 9)
                {
-            	   SReset();
+            	   output.format( "Wait for opponent to reset game.\n" );	// send message for reset
+            	   output.flush();
+            	   players[currentPlayer].otherPlayerReset();
                }	// Brandon Edit end
+               else if ( check ==10 )
+               {
+            	   if(currentPlayer == PLAYER_X) // this is set to have x be first after reset
+            	   {
+                	   output.format("Your turn\n");
+                	   output.flush();
+                	   
+                	   currentPlayer = ( currentPlayer + 1 ) % 2; // change player
+                	   players[currentPlayer].otherPlayerR2();//changing player makes it to send right message
+                	   SReset();
+            	   }
+            	   else
+            	   if(currentPlayer == PLAYER_O)
+            	   {
+                	   output.format("Opponent's turn\n");
+                	   output.flush();
+                	   
+                	   currentPlayer = ( currentPlayer + 1 ) % 2; // change player
+                	   players[currentPlayer].otherPlayerR3();
+                	   SReset();
+            	   }
+               }	// Brandon Edit End
             } // end while
          } // end try
          finally
