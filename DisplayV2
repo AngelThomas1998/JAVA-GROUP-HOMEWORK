@@ -24,6 +24,12 @@ import java.sql.SQLException;
 
 public class  TicTacToe {
 	static final String DATABASE_URL = "jdbc:mysql://localhost/tictactoe";
+static String username3;
+static String stringcounter2;
+	public TicTacToe(String username1, String stringcounter) {
+		username3 = username1;
+		stringcounter2 = stringcounter;
+	}
 
 	public static void main(String args[])
 	{
@@ -33,13 +39,15 @@ public class  TicTacToe {
 
 		try
 		{
+			
 			connection = DriverManager.getConnection( DATABASE_URL, "root", "");
 
 			statement = connection.createStatement();
 			//pass the query string into whatever needs to be done
-			statement.executeUpdate("INSERT INTO winners (username, turns) VALUES (username, counter)");
+		System.out.println(username3 + stringcounter2);
+			statement.executeUpdate(String.format("INSERT INTO winners (username, turns) VALUES (%s, %s)", username3, stringcounter2));
 			
-			resultSet = statement.executeQuery( "SELECT Username, turns, FROM winners");
+			resultSet = statement.executeQuery( "SELECT Username, turns FROM winners");
 			ResultSetMetaData metaData = resultSet.getMetaData();
 			int numberofColumns = metaData.getColumnCount();
 			System.out.println (" TicTacToe Table Database:\n");
