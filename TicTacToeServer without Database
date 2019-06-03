@@ -15,9 +15,10 @@ import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-@SuppressWarnings({ "serial" })
+@SuppressWarnings("serial")
 public class TicTacToeServer extends JFrame 
 {
+	private String response;
 	private String[] board = new String[ 9 ]; // tic-tac-toe board
 	private JTextArea outputArea; // for outputting moves
 	private Player[] players; // array of Players
@@ -32,10 +33,11 @@ public class TicTacToeServer extends JFrame
 	private Condition otherPlayerTurn; // to wait for other player's turn
 	
    // set up tic-tac-toe server and GUI that displays messages
-   public TicTacToeServer()
+   public  TicTacToeServer()
    {
       super( "Tic-Tac-Toe Server" ); // set title of window
-
+    
+    
       // create ExecutorService with a thread for each player
       runGame = Executors.newFixedThreadPool( 2 );
       gameLock = new ReentrantLock(); // create lock for game
@@ -97,7 +99,7 @@ public class TicTacToeServer extends JFrame
       } // end try
       finally
       {
-         gameLock.unlock(); // unlock game after signaling player X
+         gameLock.unlock(); // unlock game after signalling player X
       } // end finally
    } // end method execute
    
@@ -209,8 +211,8 @@ public class TicTacToeServer extends JFrame
    // determines whether game is won or game over 
    public boolean isGameOver()
    {
-	   
       return hasWinner() || boardFilled();
+     
    } // end method isGameOver
 
    // private inner class Player manages each Player as a runnable
@@ -248,33 +250,15 @@ public class TicTacToeServer extends JFrame
          output.format( "Opponent moved\n");
          output.format( "%d\n", location ); // send location of move
          output.flush();
-         output.format(hasWinner() ? "Defeat\n" : boardFilled() ? "Draw\n" : "");	// Angel Edit
+         output.format(hasWinner() ? "Defeat\n" : boardFilled() ? "Draw\n" : "");
+//        stringcounter = Integer.toString(counter);// Angel Edit
          output.flush();	// flush output
-
       } // end method otherPlayerMoved
-      
-      // Brandon Edit Begin
-      public void otherPlayerReset()
-      {
-    	  output.format( "Please confirm Restart\n" );
-    	  output.flush();
-      }
-   // both to send the appropriate message to the right client
-      public void otherPlayerR2()	
-      {
-    	  output.format( "Opponent's turn\n" );
-    	  output.flush();
-      }
-      public void otherPlayerR3()
-      {
-    	  output.format( "Your turn\n" );
-    	  output.flush();
-      }
-      // Brandon Edit End
       
       // control thread's execution
       public void run()
       {
+    	  Scanner change = new Scanner(System.in);
          // send client its mark (X or O), process messages from client
          try 
          {
@@ -321,7 +305,7 @@ public class TicTacToeServer extends JFrame
             while ( !isGameOver() ) 
             {
                int location = 0;	// initialize move location
-               // Brandon Edit Start
+               // Brandon Edit start
                int check = 0;		// set a check for the restart button.
 
                if ( input.hasNext() )
@@ -337,8 +321,29 @@ public class TicTacToeServer extends JFrame
                       displayMessage( "\nlocation: " + location );
                       output.format( "Valid move.\n" ); // notify client
                       output.flush();
-                      output.format(hasWinner() ? "Victory\n" : boardFilled() ? "Draw\n" : "");	// Angel Edit
-                      output.flush();	// flush output
+                      output.format(hasWinner() ? "Victory\n": boardFilled() ? "Draw\n" : "");
+
+                      if (hasWinner() == true)
+                      {// Angel Edit 
+                    	  System.out.println("Congratulations you won! would you like to be X or O on the next match");
+                    	  response = change.nextLine();
+                    	  if (response == "X" || response == "x")
+                    	  {
+                    		  currentPlayer = PLAYER_X;  
+                    		  SReset();
+                    	  }
+	                      else if 	(response =="O" || response == "o")
+	                      {
+	                    	  currentPlayer = PLAYER_O;
+	                    	  SReset();
+	                      }
+	                      else 
+	                      {
+	                    	  System.out.println("Thats not a valid input please reinput a value that is X or O" + response);
+	                      }
+                      }
+                      output.flush();
+                      // flush output
                    } // end if
                    
                    else // move was invalid
@@ -351,38 +356,15 @@ public class TicTacToeServer extends JFrame
                // if statement for reset.
                if (check == 9)
                {
-            	   output.format( "Wait for opponent to reset game.\n" );	// send message for reset
-            	   output.flush();
-            	   players[currentPlayer].otherPlayerReset();
+            	   SReset();
                }	// Brandon Edit end
-               else if ( check ==10 )
-               {
-            	   if(currentPlayer == PLAYER_X) // this is set to have x be first after reset
-            	   {
-                	   output.format("Your turn\n");
-                	   output.flush();
-                	   
-                	   currentPlayer = ( currentPlayer + 1 ) % 2; // change player
-                	   players[currentPlayer].otherPlayerR2();//changing player makes it to send right message
-                	   SReset();
-            	   }
-            	   
-            	   if(currentPlayer == PLAYER_O)
-            	   {
-                	   output.format("Opponent's turn\n");
-                	   output.flush();
-                	   
-                	   currentPlayer = ( currentPlayer + 1 ) % 2; // change player
-                	   players[currentPlayer].otherPlayerR3();
-                	   SReset();
-            	   }
-               }	// Brandon Edit End
             } // end while
          } // end try
          finally
          {
             try
             { //Angel edit try this so that right before it closes it'll send all the information to the database
+             
                connection.close(); // close connection to client
             } // end try
             catch ( IOException ioException ) 
@@ -391,6 +373,7 @@ public class TicTacToeServer extends JFrame
                System.exit( 1 );
             } // end catch
          } // end finally
+         change.close();
       } // end method run
 
       // set whether or not thread is suspended
