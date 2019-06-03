@@ -34,6 +34,8 @@ public class TicTacToeServer extends JFrame
 	private Condition otherPlayerConnected; // to wait for other player
 	private Condition otherPlayerTurn; // to wait for other player's turn
 	
+	private int newG;
+	
    // set up tic-tac-toe server and GUI that displays messages
    public TicTacToeServer()
    {
@@ -210,7 +212,16 @@ public class TicTacToeServer extends JFrame
    // determines whether game is won or game over 
    public boolean isGameOver()
    {
-      return hasWinner() || boardFilled();
+	   if(newG == 0)
+	   {
+		   return hasWinner() || boardFilled();
+	   }
+	   if(newG == 1)
+	   {
+		   return false;
+	   }
+	   return false;
+      
    } // end method isGameOver
 
    // private inner class Player manages each Player as a runnable
@@ -320,6 +331,8 @@ public class TicTacToeServer extends JFrame
             // while game not over
             while ( !isGameOver() ) 
             {
+            	System.out.println("hi");
+            	newG = 0;
                int location = 0;	// initialize move location
                // Brandon Edit Start
                int check = 0;		// set a check for the restart button.
@@ -342,7 +355,7 @@ public class TicTacToeServer extends JFrame
                       if (hasWinner() == true)
 	               	   {
 	               		  JOptionPane.showMessageDialog(null, "We have a winner!");
-	               		  gameLock.lock();
+	               		 // gameLock.lock();
 	               	   }
 	               	  else if (boardFilled() == true)
 	               	   {
@@ -388,6 +401,45 @@ public class TicTacToeServer extends JFrame
             	   }
                }	// Brandon Edit End
             } // end while
+            
+            while(isGameOver())
+            {
+            	System.out.println("hello");
+            	int check = 0;
+            	 if ( input.hasNext() )
+                     check = input.nextInt();	// get move location
+            	 if(check == 9)
+            	 {
+            		 SReset();
+            		 output.format( "Wait for opponent to reset game.\n" );	// send message for reset
+              	   	output.flush();
+              	   	players[currentPlayer].otherPlayerReset();
+            	 }
+                 else if ( check ==10 )
+                 {
+              	   if(currentPlayer == PLAYER_X) // this is set to have x be first after reset
+              	   {
+                  	   output.format("Your turn\n");
+                  	   output.flush();
+                  	   
+                  	   currentPlayer = ( currentPlayer + 1 ) % 2; // change player
+                  	   players[currentPlayer].otherPlayerR2();//changing player makes it to send right message
+                  	   SReset();
+              	   }
+              	   
+              	   if(currentPlayer == PLAYER_O)
+              	   {
+                  	   output.format("Opponent's turn\n");
+                  	   output.flush();
+                  	   
+                  	   currentPlayer = ( currentPlayer + 1 ) % 2; // change player
+                  	   players[currentPlayer].otherPlayerR3();
+                  	   SReset();
+              	   }
+              	 newG = 1;
+                 }	// Brandon Edit End
+            	
+            }
          } // end try
          finally
          {
