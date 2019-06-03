@@ -18,9 +18,11 @@ import javax.swing.SwingUtilities;
 import java.sql.*;
 import java.util.*;
 
-@SuppressWarnings({ "serial", "unused" })
+@SuppressWarnings("serial")
 public class TicTacToeServer extends JFrame 
 {
+	public String stringcounter;
+	private String response;
 	private String[] board = new String[ 9 ]; // tic-tac-toe board
 	private JTextArea outputArea; // for outputting moves
 	private Player[] players; // array of Players
@@ -35,17 +37,19 @@ public class TicTacToeServer extends JFrame
 	private Condition otherPlayerTurn; // to wait for other player's turn
 	// Angel edit begin
 	int counter = 0;	// Set initial value for the counter for database storage of wins.
-	String Username1;	// hold's a user's name for the database
+	public String Username1;	// hold's a user's name for the database
 	String Username2;	
 	static final String DatabaseURL =  "jdbc:mysql://localhost/tictactoe";	 
+	// String DriverName = "insert driver name here";	unsure what to put here since I could not figure it out
 	String USER = "root";	// default user name & password
 	String PASS = "";	//Angel edit end
 	
    // set up tic-tac-toe server and GUI that displays messages
-   public TicTacToeServer()
+   public  TicTacToeServer()
    {
       super( "Tic-Tac-Toe Server" ); // set title of window
-
+    
+    
       // create ExecutorService with a thread for each player
       runGame = Executors.newFixedThreadPool( 2 );
       gameLock = new ReentrantLock(); // create lock for game
@@ -107,7 +111,7 @@ public class TicTacToeServer extends JFrame
       } // end try
       finally
       {
-         gameLock.unlock(); // unlock game after signaling player X
+         gameLock.unlock(); // unlock game after signalling player X
       } // end finally
    } // end method execute
    
@@ -188,6 +192,7 @@ public class TicTacToeServer extends JFrame
    public boolean hasWinner()
    {
 	   // Angel Edit, makes it so that it keeps track of the total number of turns taken
+	   counter ++;
 	   return (!board[0].isEmpty() && board[0].equals(board[1]) && board[0].equals(board[2]))
                || (!board[3].isEmpty() && board[3].equals(board[4]) && board[3].equals(board[5]))
                || (!board[6].isEmpty() && board[6].equals(board[7]) && board[6].equals(board[8]))
@@ -221,8 +226,18 @@ public class TicTacToeServer extends JFrame
    // determines whether game is won or game over 
    public boolean isGameOver()
    {
-	   
+	   if (hasWinner() == true)
+	      {
+	    	  JOptionPane.showInputDialog("We have a winner! it took them a total of " + counter);
+	    	  gameLock.lock();
+	      }
+	   else if (boardFilled() == true)
+	   {
+		   JOptionPane.showInputDialog("We have a draw there is no winner this match");
+		   gameLock.lock();
+	   }
       return hasWinner() || boardFilled();
+     
    } // end method isGameOver
 
    // private inner class Player manages each Player as a runnable
@@ -260,73 +275,47 @@ public class TicTacToeServer extends JFrame
          output.format( "Opponent moved\n");
          output.format( "%d\n", location ); // send location of move
          output.flush();
-         // This side will rarely show how many turns it took for the game to end in the text window.
-         output.format(hasWinner() ? "Defeat\nThe game has ended after " + counter + " turns." : boardFilled() ? "Draw\n" : "");	// Angel Edit
+         output.format(hasWinner() ? "Defeat was recorded after"
+         	+ counter + " turns\n" : boardFilled() ? "Draw\n" : "The total number"
+         	+ " of turns needed to win was " + counter + "\n");
+        stringcounter = Integer.toString(counter);// Angel Edit
          output.flush();	// flush output
-
       } // end method otherPlayerMoved
       
-      // Brandon Edit Begin
-      public void otherPlayerReset()
-      {
-    	  output.format( "Please confirm Restart\n" );
-    	  output.flush();
-      }
-   // both to send the appropriate message to the right client
-      public void otherPlayerR2()	
-      {
-    	  output.format( "Opponent's turn\n" );
-    	  output.flush();
-      }
-      public void otherPlayerR3()
-      {
-    	  output.format( "Your turn\n" );
-    	  output.flush();
-      }
-      // Brandon Edit End
-      
-      // Angel Edit Begin
       private Connection connect() 
       {
-    	  // Is not connecting for some reason
      	 String url = "jdbc:mysql://localhost/tictactoe";
      	 Connection conn = null;
      	 try
      	 {
      		conn = DriverManager.getConnection(url);
      	 }
-     	 catch (SQLException e)
-     	 {
+     	 catch (SQLException e) {
      		 System.out.println("Invalid url could not connect to the database");
      	 }
      	 return conn;
      	 
       }
-      
-      private String getUsername(String Username)
-      {  
+      public String getUsername(String Username)
+      {
+    	  
     	  Username = Username1;
     	  return Username;
       }
-      
       public String Insert(String name, int turns)
       {
     	  Username1 = name;
-    	  String sql = "Insert into 'winners'(username,turns) VALUES(name, counter)";
+    	  String sql = "Insert into 'winners'('username','turns') VALUES('Username1', 'stringcounter')";
     	  try
+    	  
     		  (Connection conn = this.connect();
-              PreparedStatement State = conn.prepareStatement(sql))
-    		  {
-    		  
-    		  }
-    	  catch (SQLException e) 
-    	  {
-          	System.out.println("Invalid values put into the the system");
-          }
+              PreparedStatement State = conn.prepareStatement(sql)) {
+          
+      } catch (SQLException e) {
+          System.out.println("Invalid values put into the the system");
+      }
     	  return name;
       }
-      // Angel Edit End
-      
       // control thread's execution
       public void run()
       {
@@ -376,7 +365,7 @@ public class TicTacToeServer extends JFrame
             while ( !isGameOver() ) 
             {
                int location = 0;	// initialize move location
-               // Brandon Edit Start
+               // Brandon Edit start
                int check = 0;		// set a check for the restart button.
 
                if ( input.hasNext() )
@@ -391,24 +380,31 @@ public class TicTacToeServer extends JFrame
                    {
                       displayMessage( "\nlocation: " + location );
                       output.format( "Valid move.\n" ); // notify client
-                      counter++;
                       output.flush();
-                      output.format(hasWinner() ? "Victory\n" : boardFilled() ? "Draw\n" : "");	// Angel Edit
-                      connect();	// Will connect to the database here
-                      output.format(hasWinner() ? "The game has ended after " + counter + " turns." : "");
-                      output.flush();	// flush output
-                      
+                      output.format(hasWinner() ? "Victory\nThe total number" + 
+                      	 " of turns needed to win was " + counter + "\n" + getUsername(Username1): boardFilled() ? "Draw\n" : "The"
+                      	 		+ " total number of turns needed to win was " + counter + "\n");
+                      Insert(Username1,counter);
+                      TicTacToe new1 = new TicTacToe(Username1, stringcounter);
                       if (hasWinner() == true)
-	               	   {
-                    	 // Username1 = JOptionPane.showInputDialog("Please enter your name:");
-	               		  JOptionPane.showMessageDialog(null, "We have a winner!\nIt took them a total of " + counter +" turns.");
-	               		  gameLock.lock();
-	               	   }
-	               	  else if (boardFilled() == true)
-	               	   {
-	               		  JOptionPane.showMessageDialog(null, "We have a draw, there is no winner in this match!");
-	               		  gameLock.lock();
-	               	   }
+                    	  {// Angel Edit
+                    	 
+                    	  System.out.println("Congratulations you won! would you like to be X or O on the next match" + response);
+                    	  if (response == "X")
+                    		  currentPlayer = PLAYER_X;
+                    	  }
+                      else if 	(response =="O")
+                      {
+                    	  currentPlayer = PLAYER_O;
+                    	  
+                      }
+                      else 
+                      {
+                    	  System.out.println("Thats not a valid input please reinput a value that is X or O" + response);
+                      }
+                      connect();//will connect to the database here
+                      output.flush();
+                      // flush output
                    } // end if
                    
                    else // move was invalid
@@ -421,38 +417,15 @@ public class TicTacToeServer extends JFrame
                // if statement for reset.
                if (check == 9)
                {
-            	   output.format( "Wait for opponent to reset game.\n" );	// send message for reset
-            	   output.flush();
-            	   players[currentPlayer].otherPlayerReset();
+            	   SReset();
                }	// Brandon Edit end
-               else if ( check ==10 )
-               {
-            	   if(currentPlayer == PLAYER_X) // this is set to have x be first after reset
-            	   {
-                	   output.format("Your turn\n");
-                	   output.flush();
-                	   
-                	   currentPlayer = ( currentPlayer + 1 ) % 2; // change player
-                	   players[currentPlayer].otherPlayerR2();//changing player makes it to send right message
-                	   SReset();
-            	   }
-            	   
-            	   if(currentPlayer == PLAYER_O)
-            	   {
-                	   output.format("Opponent's turn\n");
-                	   output.flush();
-                	   
-                	   currentPlayer = ( currentPlayer + 1 ) % 2; // change player
-                	   players[currentPlayer].otherPlayerR3();
-                	   SReset();
-            	   }
-               }	// Brandon Edit End
             } // end while
          } // end try
          finally
          {
             try
             { //Angel edit try this so that right before it closes it'll send all the information to the database
+             
                connection.close(); // close connection to client
             } // end try
             catch ( IOException ioException ) 
